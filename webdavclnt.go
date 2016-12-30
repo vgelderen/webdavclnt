@@ -25,6 +25,8 @@ type WebDavClient struct {
 	Login     string
 	Password  string
 	DefFolder string
+	HTTPClient *http.Client
+	UserAgent string
 }
 
 // NewClient creates a pointer to an instance of WebDavClient.
@@ -35,6 +37,8 @@ func NewClient(host string) *WebDavClient {
 		Login:     "",
 		Password:  "",
 		DefFolder: "",
+		HTTPClient: &http.Client{},
+		UserAgent: "webdavclnt",
 	}
 }
 
@@ -60,6 +64,9 @@ func (clnt *WebDavClient) buildRequest(method, uri string, data io.Reader) (*htt
 	}
 
 	req.Header.Set("Content-Type", "application/octet-stream")
+	req.Header.Add("User-Agent", clnt.UserAgent)
+
+
 	if len(clnt.Login) > 0 {
 		req.SetBasicAuth(clnt.Login, clnt.Password)
 	}
@@ -71,6 +78,21 @@ func (clnt *WebDavClient) buildRequest(method, uri string, data io.Reader) (*htt
 // returns a poiner to an instance WebDavClient.
 func (clnt *WebDavClient) SetPort(port int) *WebDavClient {
 	clnt.Port = port
+	return clnt
+}
+
+// SetHTTPClient sets the value of a field HTTPClient,
+// returns a poiner to an instance WebDavClient.
+func (clnt *WebDavClient) SetHTTPClient(HTTPClient *http.Client) *WebDavClient {
+	clnt.HTTPClient = HTTPClient
+	return clnt
+}
+
+
+// SetUserAgent sets the value of a field UserAgent,
+// returns a poiner to an instance WebDavClient.
+func (clnt *WebDavClient) SetUserAgent(useragent string) *WebDavClient {
+	clnt.UserAgent = useragent
 	return clnt
 }
 
@@ -109,7 +131,7 @@ func (clnt *WebDavClient) Get(uri string) ([]byte, error) {
 		return nil, err
 	}
 
-	resp, err := (&http.Client{}).Do(req)
+	resp, err := clnt.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +157,7 @@ func (clnt *WebDavClient) Put(uri string, data io.Reader) error {
 		return err
 	}
 
-	resp, err := (&http.Client{}).Do(req)
+	resp, err := clnt.HTTPClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -152,7 +174,7 @@ func (clnt *WebDavClient) Delete(uri string) error {
 		return err
 	}
 
-	resp, err := (&http.Client{}).Do(req)
+	resp, err := clnt.HTTPClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -169,7 +191,7 @@ func (clnt *WebDavClient) MkCol(uri string) error {
 		return err
 	}
 
-	resp, err := (&http.Client{}).Do(req)
+	resp, err := clnt.HTTPClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -187,7 +209,7 @@ func (clnt *WebDavClient) Copy(uri, destURI string) error {
 	}
 	req.Header.Set("Destination", clnt.buildConnectionString()+clnt.DefFolder+destURI)
 
-	resp, err := (&http.Client{}).Do(req)
+	resp, err := clnt.HTTPClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -205,7 +227,7 @@ func (clnt *WebDavClient) Move(uri, destURI string) error {
 	}
 	req.Header.Set("Destination", clnt.buildConnectionString()+clnt.DefFolder+destURI)
 
-	resp, err := (&http.Client{}).Do(req)
+	resp, err := clnt.HTTPClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -226,7 +248,7 @@ func (clnt *WebDavClient) getProps(uri, propfind string) (map[string]Properties,
 	req.Header.Set("Content-Type", "application/xml")
 	req.Header.Set("Depth", "1")
 
-	resp, err := (&http.Client{}).Do(req)
+	resp, err := clnt.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
