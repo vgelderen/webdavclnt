@@ -163,6 +163,10 @@ func (clnt *WebDavClient) Put(uri string, data io.Reader) error {
 	}
 	defer resp.Body.Close()
 
+	if !clnt.statusIsValid(resp.StatusCode) {
+		return errors.New("Error: " + resp.Status)
+	}
+
 	return nil
 }
 
@@ -179,6 +183,9 @@ func (clnt *WebDavClient) Delete(uri string) error {
 		return err
 	}
 	defer resp.Body.Close()
+	if !clnt.statusIsValid(resp.StatusCode) {
+		return errors.New("Error: " + resp.Status)
+	}
 
 	return nil
 }
@@ -196,6 +203,9 @@ func (clnt *WebDavClient) MkCol(uri string) error {
 		return err
 	}
 	defer resp.Body.Close()
+	if !clnt.statusIsValid(resp.StatusCode) {
+		return errors.New("Error: " + resp.Status)
+	}
 
 	return nil
 }
@@ -214,6 +224,9 @@ func (clnt *WebDavClient) Copy(uri, destURI string) error {
 		return err
 	}
 	defer resp.Body.Close()
+	if !clnt.statusIsValid(resp.StatusCode) {
+		return errors.New("Error: " + resp.Status)
+	}
 
 	return nil
 }
@@ -232,6 +245,9 @@ func (clnt *WebDavClient) Move(uri, destURI string) error {
 		return err
 	}
 	defer resp.Body.Close()
+	if !clnt.statusIsValid(resp.StatusCode) {
+		return errors.New("Error: " + resp.Status)
+	}
 
 	return nil
 }
